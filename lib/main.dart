@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 enum PopUpItem { itemOne, itemTwo, itemThree }
 
@@ -13,11 +15,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  List<Person> contactList = [
-    Person('Alice Burger', 0, 'alice.burger@mc-donalds.de', 'Loves burgers'),
-    Person('Alice Pasta', 1, 'alice.pasta@spaghetti-mafia.it', 'Loves pasta'),
-  ];
-
+List<Person> contactList = [Person('Alice Burger', 0, 'alice.burger@mc-donalds.de', 'Loves burgers'), Person('Alice Pasta', 1, 'alice.pasta@spaghetti-mafia.it', 'Loves pasta')];
   List<Person> filteredContactList = [];
   bool adminFilterBool = false;
   bool userFilterBool = false;
@@ -37,6 +35,80 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
+Future<void> sendMail(int index, String bodyText, String subject) async {
+        final url = 'https://api.mailersend.com/v1/email';
+        final API_KEY = 'mlsn.3d59a101087d58d62616f7d1589b8ea96877a4c97ba720b2ea02927a4e799e39';
+
+        Map<String, String> headers = ({
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': 'Bearer ${API_KEY}'
+        });
+
+        Object body = jsonEncode({
+          "from": {"email": "MS_ApjIxP@test-vz9dlem26np4kj50.mlsender.net"},
+          "to": [
+          {"email": "theo.kramer.bus@gmail.com"}
+          ],
+          "subject": subject,
+          "text": bodyText,
+          "html": bodyText
+        });      
+
+        final response = await http.post(Uri.parse(url), headers: headers, body: body);
+        if (response.statusCode == 202) {
+          print('Mail send');
+        }
+        else {print(response.body);
+        }
+      }
+
+      Future<void> openMailForm(BuildContext context, String contactName) async {
+    double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
+
+    print("hellooo, width: $width, height: $height");
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        final controller = TextEditingController(
+          text:
+              'Hello $contactName,\n\n'
+        );
+
+        return AlertDialog(
+          title: const Text("Sending Email!"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Sending Reminder to $contactName'),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Email Content',
+                    alignLabelWithHint: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => sendMail(  contactList.indexWhere((person) => person.name == contactName), controller.text, "Mail von FlüBa").then((_) {
+                Navigator.of(context).pop();
+              }),
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -251,31 +323,34 @@ class _MainAppState extends State<MainApp> {
                       child: ListView.builder(
                         itemCount: filteredContactList.length,
                         itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Column(
-                              children: [
-                                Row(
-                                  spacing: 10.0,
-                                  children: [
-                                    Text(filteredContactList[index].name),
-                                    Text(
-                                      roles[filteredContactList[index].rolle],
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  spacing: 5.0,
-                                  children: [
-                                    Text(filteredContactList[index].mail),
-                                    Text(filteredContactList[index].text),
-                                  ],
-                                ),
-                              ],
+                          return GestureDetector(
+                            onTap: () => openMailForm(context, contactList[index].name),
+                            child: ListTile(
+                              title: Column(
+                                children: [
+                                  Row(
+                                    spacing: 10.0,
+                                    children: [
+                                      Text(filteredContactList[index].name),
+                                      Text(
+                                        roles[filteredContactList[index].rolle],
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    spacing: 5.0,
+                                    children: [
+                                      Text(filteredContactList[index].mail),
+                                      Text(filteredContactList[index].text),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              horizontalTitleGap: 5.0,
+                              tileColor: (index % 2 == 0)
+                                  ? const Color.fromARGB(255, 177, 177, 177)
+                                  : const Color.fromARGB(255, 141, 141, 141),
                             ),
-                            horizontalTitleGap: 5.0,
-                            tileColor: (index % 2 == 0)
-                                ? const Color.fromARGB(255, 177, 177, 177)
-                                : const Color.fromARGB(255, 141, 141, 141),
                           );
                         },
                       ),
