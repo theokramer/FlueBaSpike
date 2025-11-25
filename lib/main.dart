@@ -179,22 +179,22 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
                       builder: (_context, _setState) => ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          filteredContactList = [];
                           adminFilterBool || userFilterBool || guestFilterBool
                               ? {
-                                  /* filterValue.forEach((value){}), */
-                                  print(filterValue),
-                                  filteredContactList = contactList
-                                      .where(
-                                        (dude) =>
-                                            dude.rolle ==
-                                            roles.indexWhere(
-                                              (rolle) => rolle.contains(
-                                                filterValue[0],
-                                              ),
-                                            ),
-                                      )
-                                      .toList(),
-                                  setState(() {}),
+                                  for (var item in filterValue)
+                                    {
+                                      filteredContactList += contactList
+                                          .where(
+                                            (dude) =>
+                                                dude.rolle ==
+                                                roles.indexWhere(
+                                                  (rolle) =>
+                                                      rolle.contains(item),
+                                                ),
+                                          )
+                                          .toList(),
+                                      setState(() {}), },
                                   filteredContactList.isEmpty
                                       ? {
                                           filteredContactList = [
