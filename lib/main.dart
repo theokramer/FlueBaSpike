@@ -15,7 +15,10 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-List<Person> contactList = [Person('Alice Burger', 0, 'alice.burger@mc-donalds.de', 'Loves burgers'), Person('Alice Pasta', 1, 'alice.pasta@spaghetti-mafia.it', 'Loves pasta')];
+  List<Person> contactList = [
+    Person('Alice Burger', 0, 'alice.burger@mc-donalds.de', 'Loves burgers'),
+    Person('Alice Pasta', 1, 'alice.pasta@spaghetti-mafia.it', 'Loves pasta'),
+  ];
   List<Person> filteredContactList = [];
   bool adminFilterBool = false;
   bool userFilterBool = false;
@@ -35,35 +38,40 @@ List<Person> contactList = [Person('Alice Burger', 0, 'alice.burger@mc-donalds.d
     });
   }
 
-Future<void> sendMail(int index, String bodyText, String subject) async {
-        final url = 'https://api.mailersend.com/v1/email';
-        final API_KEY = 'mlsn.3d59a101087d58d62616f7d1589b8ea96877a4c97ba720b2ea02927a4e799e39';
+  Future<void> sendMail(int index, String bodyText, String subject) async {
+    final url = 'https://api.mailersend.com/v1/email';
+    final API_KEY =
+        'mlsn.3d59a101087d58d62616f7d1589b8ea96877a4c97ba720b2ea02927a4e799e39';
 
-        Map<String, String> headers = ({
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Authorization': 'Bearer ${API_KEY}'
-        });
+    Map<String, String> headers = ({
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Authorization': 'Bearer ${API_KEY}',
+    });
 
-        Object body = jsonEncode({
-          "from": {"email": "MS_ApjIxP@test-vz9dlem26np4kj50.mlsender.net"},
-          "to": [
-          {"email": "theo.kramer.bus@gmail.com"}
-          ],
-          "subject": subject,
-          "text": bodyText,
-          "html": bodyText
-        });      
+    Object body = jsonEncode({
+      "from": {"email": "MS_ApjIxP@test-vz9dlem26np4kj50.mlsender.net"},
+      "to": [
+        {"email": "theo.kramer.bus@gmail.com"},
+      ],
+      "subject": subject,
+      "text": bodyText,
+      "html": bodyText,
+    });
 
-        final response = await http.post(Uri.parse(url), headers: headers, body: body);
-        if (response.statusCode == 202) {
-          print('Mail send');
-        }
-        else {print(response.body);
-        }
-      }
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: body,
+    );
+    if (response.statusCode == 202) {
+      print('Mail sent');
+    } else {
+      print(response.body);
+    }
+  }
 
-      Future<void> openMailForm(BuildContext context, String contactName) async {
+  Future<void> openMailForm(BuildContext context, String contactName) async {
     double width = MediaQuery.sizeOf(context).width;
     double height = MediaQuery.sizeOf(context).height;
 
@@ -73,8 +81,7 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
       context: context,
       builder: (BuildContext context) {
         final controller = TextEditingController(
-          text:
-              'Hello $contactName,\n\n'
+          text: 'Hello $contactName,\n\n',
         );
 
         return AlertDialog(
@@ -98,9 +105,16 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
           ),
           actions: [
             TextButton(
-              onPressed: () => sendMail(  contactList.indexWhere((person) => person.name == contactName), controller.text, "Mail von FlüBa").then((_) {
-                Navigator.of(context).pop();
-              }),
+              onPressed: () =>
+                  sendMail(
+                    contactList.indexWhere(
+                      (person) => person.name == contactName,
+                    ),
+                    controller.text,
+                    "Mail von FlüBa",
+                  ).then((_) {
+                    Navigator.of(context).pop();
+                  }),
               child: const Text('Send'),
             ),
           ],
@@ -108,7 +122,7 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -194,7 +208,8 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
                                                 ),
                                           )
                                           .toList(),
-                                      setState(() {}), },
+                                      setState(() {}),
+                                    },
                                   filteredContactList.isEmpty
                                       ? {
                                           filteredContactList = [
@@ -225,94 +240,6 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
                 icon: Icon(Icons.tune),
                 tooltip: 'Filter',
               ),
-              /* SizedBox(
-                width: 150,
-                child: CheckboxListTile(
-                  title: const Text('Admins'),
-                  autofocus: false,
-                  selected: adminFilterValue,
-                  value: adminFilterValue,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      adminFilterValue = value ?? true;
-                      userFilterValue = false;
-                      guestfilterValue = false;
-                      filterValue = 'Admin';
-                    });
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 150,
-                child: CheckboxListTile(
-                  title: const Text('User'),
-                  autofocus: false,
-                  selected: userFilterValue,
-                  value: userFilterValue,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      userFilterValue = value ?? true;
-                      adminFilterValue = false;
-                      guestfilterValue = false;
-                      filterValue = 'User';
-                    });
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 150,
-                child: CheckboxListTile(
-                  title: const Text('Guest'),
-                  autofocus: false,
-                  selected: guestfilterValue,
-                  value: guestfilterValue,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      guestfilterValue = value ?? true;
-                      adminFilterValue = false;
-                      userFilterValue = false;
-                      filterValue = 'Guest';
-                    });
-                  },
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  adminFilterValue || userFilterValue || guestfilterValue
-                      ? {
-                          filteredContactList
-                     = contactList
-                              .where(
-                                (dude) =>
-                                    dude.rolle ==
-                                    roles.indexWhere(
-                                      (rolle) => rolle.contains(filterValue),
-                                    ),
-                              )
-                              .toList(),
-                          setState(() {}),
-                          filteredContactList
-                    .isEmpty
-                              ? {
-                                  filteredContactList
-                             = [
-                                    Person(
-                                      'Leider gibt es keine Personen mit dieser Rolle:',
-                                      roles.indexWhere(
-                                        (rolle) => rolle.contains(filterValue),
-                                      ),
-                                      '',
-                                      '',
-                                    ),
-                                  ],
-                                }
-                              : {},
-                        }
-                      : {filteredContactList
-                 = contactList, setState(() {})};
-                },
-                child: Text('Anwenden'),
-              ), */
               Expanded(
                 flex: 2,
                 child: ListView.builder(
@@ -324,7 +251,8 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
                         itemCount: filteredContactList.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
-                            onTap: () => openMailForm(context, contactList[index].name),
+                            onTap: () =>
+                                openMailForm(context, contactList[index].name),
                             child: ListTile(
                               title: Column(
                                 children: [
@@ -358,41 +286,6 @@ Future<void> sendMail(int index, String bodyText, String subject) async {
                   },
                 ),
               ),
-              /*               filteredContactList
-         = contactList.indexWhere((penis) => penis.rolle.toInt() == 0);
- */
-              /*               SizedBox(
-                height: 520,
-                child: ListView.builder(
-                  itemCount: contactList.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Column(
-                        children: [
-                          Row(
-                            spacing: 10.0,
-                            children: [
-                              Text(contactList[index].name),
-                              Text(roles[contactList[index].rolle]),
-                            ],
-                          ),
-                          Row(
-                            spacing: 5.0,
-                            children: [
-                              Text(contactList[index].mail),
-                              Text(contactList[index].text),
-                            ],
-                          ),
-                        ],
-                      ),
-                      horizontalTitleGap: 5.0,
-                      tileColor: (index % 2 == 0)
-                          ? const Color.fromARGB(255, 177, 177, 177)
-                          : const Color.fromARGB(255, 141, 141, 141),
-                    );
-                  },
-                ),
-              ), */
             ],
           ),
         ),
